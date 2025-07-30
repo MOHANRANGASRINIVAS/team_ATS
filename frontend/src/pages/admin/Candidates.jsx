@@ -231,15 +231,18 @@ const AdminCandidates = () => {
         'ROC Check Done': 'roc_check_done',
         'Applied for IBM Before': 'applied_for_ibm_before',
         'Is Organization Employee': 'is_organization_employee',
+        'Is the resource employee of your organization': 'is_organization_employee',
         'Date of Joining Organization': 'date_of_joining_organization',
         'Interested in Relocation': 'interested_in_relocation',
         'Willingness Work Shifts': 'willingness_work_shifts',
+        'Willingness to Work Shifts': 'willingness_work_shifts',
         'Role Applied For': 'role_applied_for',
         'Reason for Job Change': 'reason_for_job_change',
         'Current Role': 'current_role',
         'Notice Period': 'notice_period',
         'Payrolling Company Name': 'payrolling_company_name',
         'Education Authenticated UGC Check': 'education_authenticated_ugc_check',
+        'Have you authenticated resources education history with fake list of universities published by UGC': 'education_authenticated_ugc_check',
         'Total Experience': 'total_experience',
         'Relevant Experience': 'relevant_experience',
         'SME Name': 'sme_name',
@@ -248,6 +251,7 @@ const AdminCandidates = () => {
         'Talent Acquisition Consultant': 'talent_acquisition_consultant',
         'Date of Assessment': 'date_of_assessment',
         'Title Position': 'title_position',
+        'Title/Position': 'title_position',
         'PAN Number': 'pan_number',
         'Passport Number': 'passport_number',
         'Current Location': 'current_location',
@@ -255,8 +259,11 @@ const AdminCandidates = () => {
         'Preferred Interview Location': 'preferred_interview_location',
         'Interview Location': 'interview_location',
         'Availability Interview': 'availability_interview',
+        'Availability for Interview': 'availability_interview',
         'General Attitude Comments': 'general_attitude_comments',
-        'Oral Communication Comments': 'oral_communication_comments'
+        'Oral Communication Comments': 'oral_communication_comments',
+        'Additional Certifications': 'education_additional_certifications',
+        'Duration': 'education_degree_duration'
       }
       
       const fieldName = fieldNameMap[label] || label.toLowerCase().replace(/\s+/g, '_')
@@ -456,6 +463,24 @@ const AdminCandidates = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                <input
+                  type="text"
+                  value={editForm.education_degree_duration || ''}
+                  onChange={(e) => setEditForm({...editForm, education_degree_duration: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Additional Certifications</label>
+                <input
+                  type="text"
+                  value={editForm.education_additional_certifications || ''}
+                  onChange={(e) => setEditForm({...editForm, education_additional_certifications: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -474,7 +499,6 @@ const AdminCandidates = () => {
              <div><span className="font-medium">Percentage:</span> {selectedCandidate.education_x_percentage || 'Not provided'}</div>
              <div><span className="font-medium">Start Date:</span> {selectedCandidate.education_x_start_date || 'Not provided'}</div>
              <div><span className="font-medium">End Date:</span> {selectedCandidate.education_x_end_date || 'Not provided'}</div>
-             <div><span className="font-medium">Year of Completion:</span> {selectedCandidate.education_x_year_completion || 'Not provided'}</div>
            </div>
          </div>
 
@@ -486,7 +510,6 @@ const AdminCandidates = () => {
              <div><span className="font-medium">Percentage:</span> {selectedCandidate.education_xii_percentage || 'Not provided'}</div>
              <div><span className="font-medium">Start Date:</span> {selectedCandidate.education_xii_start_date || 'Not provided'}</div>
              <div><span className="font-medium">End Date:</span> {selectedCandidate.education_xii_end_date || 'Not provided'}</div>
-             <div><span className="font-medium">Year of Completion:</span> {selectedCandidate.education_xii_year_completion || 'Not provided'}</div>
            </div>
          </div>
 
@@ -499,9 +522,6 @@ const AdminCandidates = () => {
              <div><span className="font-medium">Percentage:</span> {selectedCandidate.education_degree_percentage || 'Not provided'}</div>
              <div><span className="font-medium">Start Date:</span> {selectedCandidate.education_degree_start_date || 'Not provided'}</div>
              <div><span className="font-medium">End Date:</span> {selectedCandidate.education_degree_end_date || 'Not provided'}</div>
-             <div><span className="font-medium">Year of Completion:</span> {selectedCandidate.education_degree_year_completion || 'Not provided'}</div>
-             <div><span className="font-medium">Duration:</span> {selectedCandidate.education_degree_duration || 'Not provided'}</div>
-             <div><span className="font-medium">Additional Certifications:</span> {selectedCandidate.education_additional_certifications || 'Not provided'}</div>
            </div>
          </div>
       </div>
@@ -648,10 +668,10 @@ const AdminCandidates = () => {
               {/* Personal Information */}
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <h4 className="font-semibold text-lg text-gray-800 border-b pb-2 mb-4">Personal Information</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  {renderField('Name', selectedCandidate.name)}
-                  {renderField('Title/Position', selectedCandidate.title_position || selectedCandidate.role_applied_for)}
-                  {renderField('Email', selectedCandidate.email)}
+                                 <div className="grid grid-cols-2 gap-4">
+                   {renderField('Name', selectedCandidate.name)}
+                   {renderField('Title/Position', selectedCandidate.title_position || selectedCandidate.job_title)}
+                   {renderField('Email', selectedCandidate.email)}
                   {renderField('Phone', selectedCandidate.phone)}
                   {renderField('PAN Number', selectedCandidate.pan_number)}
                   {renderField('Passport Number', selectedCandidate.passport_number)}
@@ -675,26 +695,26 @@ const AdminCandidates = () => {
                     { value: 'YES', label: 'Yes' },
                     { value: 'NO', label: 'No' }
                   ])}
-                  {renderField('Is the resource employee of your organization', selectedCandidate.is_organization_employee, false, 'dropdown', [
+                  {renderField('Is Organization Employee', selectedCandidate.is_organization_employee, false, 'dropdown', [
                     { value: 'YES', label: 'Yes' },
                     { value: 'NO', label: 'No' }
                   ])}
                   {(selectedCandidate.is_organization_employee === 'YES' || selectedCandidate.is_organization_employee === 'Yes' || selectedCandidate.is_organization_employee === 'yes') && (
                     <>
-                      {renderField('What is the date of joining of the resource in your organization', selectedCandidate.date_of_joining_organization)}
-                      {renderField('Which client the resource has been deployed through your organization', selectedCandidate.client_deployment_details?.join(', ') || '')}
+                      {renderField('Date of Joining Organization', selectedCandidate.date_of_joining_organization)}
+                      {renderField('Client Deployment Details', selectedCandidate.client_deployment_details?.join(', ') || '')}
                     </>
                   )}
                   {renderField('Interested in Relocation', selectedCandidate.interested_in_relocation, false, 'dropdown', [
                     { value: 'YES', label: 'Yes' },
                     { value: 'NO', label: 'No' }
                   ])}
-                  {renderField('Willingness to Work Shifts', selectedCandidate.willingness_work_shifts, false, 'dropdown', [
-                    { value: 'YES', label: 'Yes' },
-                    { value: 'NO', label: 'No' }
-                  ])}
-                  {renderField('Role Applied For', selectedCandidate.role_applied_for || selectedCandidate.job_title)}
-                  {renderField('Reason for Job Change', selectedCandidate.reason_for_job_change)}
+                                     {renderField('Willingness to Work Shifts', selectedCandidate.willingness_work_shifts, false, 'dropdown', [
+                     { value: 'YES', label: 'Yes' },
+                     { value: 'NO', label: 'No' }
+                   ])}
+                   {renderField('Role Applied For', selectedCandidate.role_applied_for || selectedCandidate.job_title)}
+                   {renderField('Reason for Job Change', selectedCandidate.reason_for_job_change)}
                   {renderField('Current Role', selectedCandidate.current_role)}
                   {renderField('Have you authenticated resources education history with fake list of universities published by UGC', selectedCandidate.education_authenticated_ugc_check, false, 'dropdown', [
                     { value: 'YES', label: 'Yes' },

@@ -1024,16 +1024,6 @@ const AddCandidateForm = ({ formData, setFormData, onSave }) => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Publications</label>
-            <textarea
-              value={formData.publications || ''}
-              onChange={(e) => handleChange('publications', e.target.value)}
-              className="input-field"
-              rows="3"
-              placeholder="List any publications, research papers, or technical articles..."
-            />
-          </div>
-          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">References</label>
             <textarea
               value={formData.references || ''}

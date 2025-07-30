@@ -30,6 +30,12 @@ async def get_candidate_details(candidate_id: str, current_user: dict = Depends(
     if not candidate:
         raise HTTPException(status_code=404, detail="Candidate not found")
     
+    # Get job information if job_id exists
+    if candidate.get("job_id"):
+        job = await db.recruitment_portal.jobs.find_one({"job_id": candidate["job_id"]})
+        if job:
+            candidate["job_title"] = job.get("title")
+    
     candidate["id"] = str(candidate["_id"])
     del candidate["_id"]
     
