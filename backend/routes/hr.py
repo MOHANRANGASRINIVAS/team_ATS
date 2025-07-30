@@ -67,6 +67,14 @@ async def get_candidates_for_job(
         # Convert datetime fields to ISO format for JSON serialization
         if "created_at" in candidate and isinstance(candidate["created_at"], datetime):
             candidate["created_at"] = candidate["created_at"].isoformat()
+        
+        # Add job title information
+        if candidate.get("job_id"):
+            candidate["job_title"] = job.get("title")
+            if not candidate.get("title_position"):
+                candidate["title_position"] = job.get("title")
+            if not candidate.get("role_applied_for"):
+                candidate["role_applied_for"] = job.get("title")
     
     return candidates
 
@@ -122,13 +130,31 @@ async def update_candidate_status(
 @router.get("/candidates")
 async def get_all_hr_candidates(current_user: dict = Depends(get_current_hr_user)):
     db = await get_database()
-    candidates = await db.recruitment_portal.candidates.find({"created_by": str(current_user["_id"])}).to_list(length=100)
+    
+    # Get jobs allocated to this HR
+    jobs = await db.recruitment_portal.jobs.find({"assigned_hr": str(current_user["_id"])}).to_list(length=100)
+    job_id_list = [job["job_id"] for job in jobs]
+    job_map = {job["job_id"]: job["title"] for job in jobs}
+    
+    candidates = await db.recruitment_portal.candidates.find({"job_id": {"$in": job_id_list}}).to_list(length=100)
     for candidate in candidates:
         candidate["id"] = str(candidate["_id"])
         del candidate["_id"]
         # Convert datetime fields to ISO format for JSON serialization
         if "created_at" in candidate and isinstance(candidate["created_at"], datetime):
             candidate["created_at"] = candidate["created_at"].isoformat()
+        
+        # Add job title information
+        if candidate.get("job_id"):
+            candidate["applied_for"] = job_map.get(candidate["job_id"], "Unknown Job")
+            # Ensure job title is available for display
+            if not candidate.get("job_title"):
+                candidate["job_title"] = job_map.get(candidate["job_id"], "Unknown Job")
+            if not candidate.get("title_position"):
+                candidate["title_position"] = job_map.get(candidate["job_id"], "Unknown Job")
+            if not candidate.get("role_applied_for"):
+                candidate["role_applied_for"] = job_map.get(candidate["job_id"], "Unknown Job")
+    
     return candidates
 
 @router.get("/dashboard")
@@ -138,6 +164,8 @@ async def get_hr_dashboard(current_user: dict = Depends(get_current_hr_user)):
     total_jobs = await db.recruitment_portal.jobs.count_documents({"assigned_hr": str(current_user["_id"])})
     open_jobs = await db.recruitment_portal.jobs.count_documents({"assigned_hr": str(current_user["_id"]), "status": "open"})
     closed_jobs = await db.recruitment_portal.jobs.count_documents({"assigned_hr": str(current_user["_id"]), "status": "closed"})
+    allocated_jobs = await db.recruitment_portal.jobs.count_documents({"assigned_hr": str(current_user["_id"]), "status": "allocated"})
+    submitted_jobs = await db.recruitment_portal.jobs.count_documents({"assigned_hr": str(current_user["_id"]), "status": "submit"})
     # Get candidate counts using job_id (string)
     jobs = await db.recruitment_portal.jobs.find({"assigned_hr": str(current_user["_id"])}).to_list(length=100)
     job_id_list = [job["job_id"] for job in jobs]
@@ -151,6 +179,8 @@ async def get_hr_dashboard(current_user: dict = Depends(get_current_hr_user)):
         "total_jobs": total_jobs,
         "open_jobs": open_jobs,
         "closed_jobs": closed_jobs,
+        "allocated_jobs": allocated_jobs,
+        "submitted_jobs": submitted_jobs,
         "total_candidates": total_candidates,
         "selected_candidates": selected_candidates,
         "rejected_candidates": rejected_candidates,

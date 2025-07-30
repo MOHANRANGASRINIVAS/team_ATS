@@ -120,7 +120,9 @@ async def update_job(
 @router.get("/jobs")
 async def get_all_jobs(
     status: Optional[str] = None,
-    source_company: Optional[str] = None,
+    opening_date_from: Optional[str] = None,
+    opening_date_to: Optional[str] = None,
+    assigned_hr: Optional[str] = None,
     current_user: dict = Depends(get_current_admin_user)
 ):
     db = await get_database()
@@ -129,8 +131,20 @@ async def get_all_jobs(
     filter_query = {}
     if status:
         filter_query["status"] = status
-    if source_company:
-        filter_query["source_company"] = source_company
+    if opening_date_from:
+        # Convert date string to datetime with time set to start of day
+        from_date = datetime.fromisoformat(opening_date_from)
+        filter_query["opening_date"] = {"$gte": from_date}
+    if opening_date_to:
+        # Convert date string to datetime with time set to end of day (23:59:59)
+        to_date = datetime.fromisoformat(opening_date_to)
+        to_date = to_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+        if "opening_date" in filter_query:
+            filter_query["opening_date"]["$lte"] = to_date
+        else:
+            filter_query["opening_date"] = {"$lte": to_date}
+    if assigned_hr:
+        filter_query["assigned_hr"] = assigned_hr
     
     # Get all HR users for name mapping
     hr_users = await db.recruitment_portal.users.find({"role": "hr"}).to_list(length=100)
@@ -211,11 +225,15 @@ async def create_hr_user(user_data: dict, current_user: dict = Depends(get_curre
     user_data["created_at"] = created_at
     
     result = await db.recruitment_portal.users.insert_one(user_data)
-    user_data["id"] = str(result.inserted_id)
     
-    # Convert datetime to ISO format for JSON serialization
-    response_data = user_data.copy()
-    response_data["created_at"] = created_at.isoformat()
+    # Create response data without ObjectId
+    response_data = {
+        "id": str(result.inserted_id),
+        "name": user_data["name"],
+        "email": user_data["email"],
+        "role": user_data["role"],
+        "created_at": created_at.isoformat()
+    }
     
     return {"message": "HR user created successfully", "user": response_data}
 
@@ -274,6 +292,7 @@ async def get_admin_dashboard(current_user: dict = Depends(get_current_admin_use
     open_jobs = await db.recruitment_portal.jobs.count_documents({"status": "open"})
     allocated_jobs = await db.recruitment_portal.jobs.count_documents({"status": "allocated"})
     closed_jobs = await db.recruitment_portal.jobs.count_documents({"status": "closed"})
+    submitted_jobs = await db.recruitment_portal.jobs.count_documents({"status": "submit"})
     
     # Get candidate counts
     total_candidates = await db.recruitment_portal.candidates.count_documents({})
@@ -288,6 +307,7 @@ async def get_admin_dashboard(current_user: dict = Depends(get_current_admin_use
         "open_jobs": open_jobs,
         "allocated_jobs": allocated_jobs,
         "closed_jobs": closed_jobs,
+        "submitted_jobs": submitted_jobs,
         "total_candidates": total_candidates,
         "selected_candidates": selected_candidates,
         "rejected_candidates": rejected_candidates,
@@ -300,11 +320,26 @@ async def get_all_candidates(current_user: dict = Depends(get_current_admin_user
     
     candidates = await db.recruitment_portal.candidates.find({}).sort("created_at", -1).to_list(length=100)
     
+    # Get all jobs for job title mapping
+    jobs = await db.recruitment_portal.jobs.find({}).to_list(length=1000)
+    job_map = {job["job_id"]: job["title"] for job in jobs}
+    
     for candidate in candidates:
         candidate["id"] = str(candidate["_id"])
         del candidate["_id"]
         # Convert datetime fields to ISO format for JSON serialization
         if "created_at" in candidate and isinstance(candidate["created_at"], datetime):
             candidate["created_at"] = candidate["created_at"].isoformat()
+        
+        # Add job title information
+        if candidate.get("job_id"):
+            candidate["applied_for"] = job_map.get(candidate["job_id"], "Unknown Job")
+            # Ensure job title is available for display
+            if not candidate.get("job_title"):
+                candidate["job_title"] = job_map.get(candidate["job_id"], "Unknown Job")
+            if not candidate.get("title_position"):
+                candidate["title_position"] = job_map.get(candidate["job_id"], "Unknown Job")
+            if not candidate.get("role_applied_for"):
+                candidate["role_applied_for"] = job_map.get(candidate["job_id"], "Unknown Job")
     
     return candidates 

@@ -10,7 +10,9 @@ const AdminJobs = () => {
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({
     status: '',
-    source_company: ''
+    opening_date_from: '',
+    opening_date_to: '',
+    assigned_hr: ''
   })
   const [viewJob, setViewJob] = useState(null)
   const [editJob, setEditJob] = useState(null)
@@ -54,7 +56,9 @@ const AdminJobs = () => {
     try {
       const params = new URLSearchParams()
       if (filters.status) params.append('status', filters.status)
-      if (filters.source_company) params.append('source_company', filters.source_company)
+      if (filters.opening_date_from) params.append('opening_date_from', filters.opening_date_from)
+      if (filters.opening_date_to) params.append('opening_date_to', filters.opening_date_to)
+      if (filters.assigned_hr) params.append('assigned_hr', filters.assigned_hr)
       
       const response = await api.get(`/admin/jobs?${params.toString()}`)
       setJobs(response.data)
@@ -73,6 +77,8 @@ const AdminJobs = () => {
         return 'bg-blue-100 text-blue-800'
       case 'closed':
         return 'bg-gray-100 text-gray-800'
+      case 'submit':
+        return 'bg-purple-100 text-purple-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
@@ -118,7 +124,7 @@ const AdminJobs = () => {
           <Filter className="h-5 w-5 text-gray-400 mr-2" />
           <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Status
@@ -132,19 +138,45 @@ const AdminJobs = () => {
               <option value="open">Open</option>
               <option value="allocated">Allocated</option>
               <option value="closed">Closed</option>
+              <option value="submit">Submit</option>
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Source Company
+              Opening Date From
             </label>
             <input
-              type="text"
-              value={filters.source_company}
-              onChange={(e) => setFilters({ ...filters, source_company: e.target.value })}
-              placeholder="Filter by company"
+              type="date"
+              value={filters.opening_date_from}
+              onChange={(e) => setFilters({ ...filters, opening_date_from: e.target.value })}
               className="input-field"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Opening Date To
+            </label>
+            <input
+              type="date"
+              value={filters.opening_date_to}
+              onChange={(e) => setFilters({ ...filters, opening_date_to: e.target.value })}
+              className="input-field"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Assigned HR
+            </label>
+            <select
+              value={filters.assigned_hr}
+              onChange={(e) => setFilters({ ...filters, assigned_hr: e.target.value })}
+              className="input-field"
+            >
+              <option value="">All HR</option>
+              {hrUsers.map(user => (
+                <option key={user.id} value={user.id}>{user.name}</option>
+              ))}
+            </select>
           </div>
         </div>
       </motion.div>
@@ -426,6 +458,7 @@ const EditJobForm = ({ job, hrUsers, onUpdate, onCancel }) => {
             <option value="open">Open</option>
             <option value="allocated">Allocated</option>
             <option value="closed">Closed</option>
+            <option value="submit">Submit</option>
           </select>
         </div>
         <div>

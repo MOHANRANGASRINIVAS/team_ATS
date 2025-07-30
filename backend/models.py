@@ -28,7 +28,7 @@ class Job(JobBase):
     id: str
     uploaded_by: str
     allocated_to: Optional[str] = None
-    status: str = "open"  # "open", "allocated", "closed"
+    status: str = "open"  # "open", "allocated", "closed", "submit"
     created_at: datetime
 
 class SkillAssessment(BaseModel):

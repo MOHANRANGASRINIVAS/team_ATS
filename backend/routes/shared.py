@@ -35,6 +35,11 @@ async def get_candidate_details(candidate_id: str, current_user: dict = Depends(
         job = await db.recruitment_portal.jobs.find_one({"job_id": candidate["job_id"]})
         if job:
             candidate["job_title"] = job.get("title")
+            # Ensure title_position and role_applied_for are set to job title if not already set
+            if not candidate.get("title_position"):
+                candidate["title_position"] = job.get("title")
+            if not candidate.get("role_applied_for"):
+                candidate["role_applied_for"] = job.get("title")
     
     candidate["id"] = str(candidate["_id"])
     del candidate["_id"]
@@ -58,6 +63,11 @@ async def create_candidate(candidate: CandidateCreate, current_user: dict = Depe
     
     if not job:
         raise HTTPException(status_code=403, detail="Not authorized to add candidates to this job")
+    
+    # Save the job title with the candidate data
+    candidate_data["job_title"] = job.get("title")
+    candidate_data["title_position"] = job.get("title")
+    candidate_data["role_applied_for"] = job.get("title")
     
     result = await db.recruitment_portal.candidates.insert_one(candidate_data)
     candidate_data["id"] = str(result.inserted_id)

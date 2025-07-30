@@ -63,18 +63,20 @@ const AdminDashboard = () => {
   }
 
   const jobStatusData = {
-    labels: ['Open', 'Allocated', 'Closed'],
+    labels: ['Open', 'Allocated', 'Closed', 'Submitted'],
     datasets: [
       {
         data: [
           dashboardData?.open_jobs || 0,
           dashboardData?.allocated_jobs || 0,
           dashboardData?.closed_jobs || 0,
+          dashboardData?.submitted_jobs || 0,
         ],
         backgroundColor: [
           '#3B82F6',
           '#10B981',
           '#6B7280',
+          '#8B5CF6',
         ],
         borderWidth: 2,
         borderColor: '#fff',
@@ -82,17 +84,7 @@ const AdminDashboard = () => {
     ],
   }
 
-  const hrPerformanceData = {
-    labels: dashboardData?.hr_performance?.map(item => `HR ${item._id.slice(-4)}`) || [],
-    datasets: [
-      {
-        label: 'Jobs Handled',
-        data: dashboardData?.hr_performance?.map(item => item.jobs_handled) || [],
-        backgroundColor: '#3B82F6',
-        borderRadius: 4,
-      },
-    ],
-  }
+
 
   const stats = [
     {
@@ -172,7 +164,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -196,33 +188,7 @@ const AdminDashboard = () => {
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="card"
-        >
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">HR Performance</h3>
-          <div className="h-64">
-            <Bar
-              data={hrPerformanceData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    display: false,
-                  },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                  },
-                },
-              }}
-            />
-          </div>
-        </motion.div>
+
       </div>
     </div>
   )

@@ -95,16 +95,20 @@ const HRDashboard = () => {
   ]
 
   const jobStatusData = {
-    labels: ['Open Jobs', 'Closed Jobs'],
+    labels: ['Open', 'Allocated', 'Closed', 'Submitted'],
     datasets: [
       {
         data: [
           dashboardData?.open_jobs || 0,
+          dashboardData?.allocated_jobs || 0,
           dashboardData?.closed_jobs || 0,
+          dashboardData?.submitted_jobs || 0,
         ],
         backgroundColor: [
           '#F59E0B',
+          '#10B981',
           '#6B7280',
+          '#8B5CF6',
         ],
         borderWidth: 2,
         borderColor: '#fff',

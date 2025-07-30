@@ -82,6 +82,8 @@ const HRJobs = () => {
         return 'bg-blue-100 text-blue-800'
       case 'closed':
         return 'bg-green-100 text-green-800'
+      case 'submit':
+        return 'bg-purple-100 text-purple-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
@@ -222,6 +224,7 @@ const HRJobs = () => {
               <option value="open">Open</option>
               <option value="allocated">Allocated</option>
               <option value="closed">Closed</option>
+              <option value="submit">Submit</option>
             </select>
           </div>
         </div>
@@ -416,6 +419,7 @@ const HRJobs = () => {
                   <option value="allocated">Allocated</option>
                   <option value="open">Open</option>
                   <option value="closed">Closed</option>
+                  <option value="submit">Submit</option>
                 </select>
               </div>
               <div className="flex justify-end space-x-3">
