@@ -72,7 +72,7 @@ async def register(user: UserCreate):
         raise HTTPException(status_code=400, detail="Email already registered")
     
     # Create new user
-    user_data = user.dict()
+    user_data = user.model_dump()
     user_data["password"] = get_password_hash(user.password)
     user_data["created_at"] = datetime.utcnow()
     

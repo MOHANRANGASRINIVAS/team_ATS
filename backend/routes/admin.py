@@ -142,6 +142,12 @@ async def get_all_jobs(
         job["id"] = str(job["_id"])
         del job["_id"]
         
+        # Convert datetime fields to ISO format for JSON serialization
+        if "created_at" in job and isinstance(job["created_at"], datetime):
+            job["created_at"] = job["created_at"].isoformat()
+        if "opening_date" in job and isinstance(job["opening_date"], datetime):
+            job["opening_date"] = job["opening_date"].isoformat()
+        
         # Add HR user name if assigned
         if job.get("assigned_hr"):
             job["assigned_hr_name"] = hr_user_map.get(job["assigned_hr"], "Unknown")
@@ -181,6 +187,9 @@ async def get_all_users(current_user: dict = Depends(get_current_admin_user)):
         user["id"] = str(user["_id"])
         del user["_id"]
         del user["password"]  # Don't send password
+        # Convert datetime fields to ISO format for JSON serialization
+        if "created_at" in user and isinstance(user["created_at"], datetime):
+            user["created_at"] = user["created_at"].isoformat()
     
     return users
 
@@ -196,14 +205,19 @@ async def create_hr_user(user_data: dict, current_user: dict = Depends(get_curre
     # Create new HR user
     from routes.auth import get_password_hash
     
+    created_at = datetime.utcnow()
     user_data["role"] = "hr"
     user_data["password"] = get_password_hash(user_data["password"])
-    user_data["created_at"] = datetime.utcnow()
+    user_data["created_at"] = created_at
     
     result = await db.recruitment_portal.users.insert_one(user_data)
     user_data["id"] = str(result.inserted_id)
     
-    return {"message": "HR user created successfully", "user": user_data}
+    # Convert datetime to ISO format for JSON serialization
+    response_data = user_data.copy()
+    response_data["created_at"] = created_at.isoformat()
+    
+    return {"message": "HR user created successfully", "user": response_data}
 
 @router.delete("/users/{user_id}")
 async def delete_hr_user(user_id: str, current_user: dict = Depends(get_current_admin_user)):
@@ -289,5 +303,8 @@ async def get_all_candidates(current_user: dict = Depends(get_current_admin_user
     for candidate in candidates:
         candidate["id"] = str(candidate["_id"])
         del candidate["_id"]
+        # Convert datetime fields to ISO format for JSON serialization
+        if "created_at" in candidate and isinstance(candidate["created_at"], datetime):
+            candidate["created_at"] = candidate["created_at"].isoformat()
     
     return candidates 

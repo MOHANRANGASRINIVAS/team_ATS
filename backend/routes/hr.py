@@ -16,6 +16,11 @@ async def get_hr_jobs(current_user: dict = Depends(get_current_hr_user)):
     for job in jobs:
         job["id"] = str(job["_id"])
         del job["_id"]
+        # Convert datetime fields to ISO format for JSON serialization
+        if "created_at" in job and isinstance(job["created_at"], datetime):
+            job["created_at"] = job["created_at"].isoformat()
+        if "opening_date" in job and isinstance(job["opening_date"], datetime):
+            job["opening_date"] = job["opening_date"].isoformat()
     
     return jobs
 
@@ -59,6 +64,9 @@ async def get_candidates_for_job(
     for candidate in candidates:
         candidate["id"] = str(candidate["_id"])
         del candidate["_id"]
+        # Convert datetime fields to ISO format for JSON serialization
+        if "created_at" in candidate and isinstance(candidate["created_at"], datetime):
+            candidate["created_at"] = candidate["created_at"].isoformat()
     
     return candidates
 
@@ -118,6 +126,9 @@ async def get_all_hr_candidates(current_user: dict = Depends(get_current_hr_user
     for candidate in candidates:
         candidate["id"] = str(candidate["_id"])
         del candidate["_id"]
+        # Convert datetime fields to ISO format for JSON serialization
+        if "created_at" in candidate and isinstance(candidate["created_at"], datetime):
+            candidate["created_at"] = candidate["created_at"].isoformat()
     return candidates
 
 @router.get("/dashboard")
